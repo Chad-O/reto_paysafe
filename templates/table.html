@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>Filtered Data Table</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        form { margin-bottom: 20px; }
+        input[type="text"] { padding: 8px; width: 200px; }
+        button { padding: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Search for Transactions</h2>
+    
+    <form method="POST" action="/table">
+        <label for="id">Enter ID:</label>
+        <input type="text" name="id" id="id" value="{{ search_id if search_id else '' }}" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if data %}
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Status</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row.id }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No results found.</p>
+    {% endif %}
+</body>
+</html>

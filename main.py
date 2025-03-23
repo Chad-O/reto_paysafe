@@ -1,6 +1,6 @@
 import os
 import stripe
-from flask import Flask, render_template,jsonify,request,session
+from flask import Flask, render_template,jsonify,request,session,redirect,url_for
 from flask_session import Session
 from dotenv import load_dotenv
 import datetime
@@ -107,10 +107,15 @@ def stripe_webhook():
         "checkout.session.completed": "Checkout Completed",
         "checkout.session.expired": "Checkout Expired",
         "payment_intent.created": "Payment Initialized",
-        "charge.created": "Charge Created",
+        "charge.succeeded": "Charge Succeded",
+        "charge.succeded": "Charge Succeeded",
         "charge.updated": "Charge Updated",
         "payment_intent.succeeded": "Paid",
         "payment_intent.payment_failed": "Payment Fail",
+        "refund.created": "Refund Created",
+        "refund.updated": "Refund Updated",
+        "charge.refunded": "Charge Refunded",
+        "charge.refund.updated": "Charge Refund Updated",
     }
 
     status = status_mapping.get(event_type, "Unknown")
@@ -118,6 +123,36 @@ def stripe_webhook():
     log(session_id, status,event_type)
     return jsonify({"message": "Event logged"}),
 
-if __name__ == '__main__':
-    app.run(debug=True)
+def read_txt():
+    with open("log.txt", "r") as file:
+        lines = file.readlines()
+    
+    data = [line.strip().split("\t") for line in lines]
+    return data
 
+@app.route("/table", methods=["GET", "POST"])
+def get_table():
+
+    if request.method == "POST":
+        search_id = request.form.get("id")
+        return redirect(url_for("get_table", id=search_id))
+    
+    search_id = request.args.get("id")
+    data = read_txt()
+    
+    filtered_data = []
+    if search_id:
+        filtered_data = [
+            {"id": row[0], "status": row[2], "timestamp": row[3]}
+            for row in data if row[0] == search_id
+        ]
+    
+    if request.headers.get("Accept") == "application/json":
+        if not filtered_data:
+            return jsonify({"error": "ID not found"}), 404
+        return jsonify({"data": filtered_data})
+    
+    return render_template("table.html", data=filtered_data, search_id=search_id)
+
+if __name__ == "__main__":
+    app.run(debug=True)
