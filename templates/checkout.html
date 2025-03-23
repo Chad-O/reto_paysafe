@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #d2d3f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 { margin-bottom: 20px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #2D7D46;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #256b3a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Checkout</h2>
+        <img src="https://images.ctfassets.net/6jpeaipefazr/VyK29R6sZq9F4vdZnNCEM/6c7a1a812f7a371695789fd513c2d273/P3-4007993031499.jpg?fm=jpg&fl=progressive&q=60&w=400&h=400&fit=scale" alt="kitkat" height="200">
+        <input type="text" id="amount" value="S/. 20.00" min="1" readonly>
+        <button id="pay">Pay</button>
+    </div>
+
+    <script>
+        const stripe = Stripe("pk_test_51R5UIDF4Cu6plZwPOGlApxZ25bh2J1mgMA5DJqGvSNGWvYvo5HBqyfdP2BLDrn2iBjzTOSjdqGXLkL89PVYNvjsT00xN9NDjkU");
+        
+        document.getElementById("pay").addEventListener("click", async () => {
+          console.log("click");
+        const response = await fetch("/checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        const session = await response.json();
+        if (session.error) {
+            alert(session.error);
+        } else {
+            stripe.redirectToCheckout({ sessionId: session.id });
+        }
+    });
+    </script>
+</body>
+</html>
